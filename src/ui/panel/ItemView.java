@@ -94,7 +94,7 @@ public class ItemView extends JPanel {
         this.setSize(width, height);
         this.file = file;
         if (file.getAbsolutePath().toLowerCase().endsWith(".gif")) {
-            this.label = new GifPlayer(file.getAbsolutePath());
+            this.label = new GifPlayer();
         }
         else {
             this.label = new JLabel();

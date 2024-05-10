@@ -6,7 +6,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-import static util.core.GlobalResources.ICON_FONT;
 import static util.core.GlobalResources.errorDialog;
 
 public class GifPlayer extends JLabel {
@@ -16,14 +15,7 @@ public class GifPlayer extends JLabel {
 
     private int index;
 
-    public GifPlayer(String path, int width, int height) {
-        setFont(ICON_FONT.deriveFont(Font.PLAIN, 64));
-        setHorizontalAlignment(SwingConstants.CENTER);
-        setSize(width, height);
-        initialize();
-    }
-
-    public GifPlayer(String path) {
+    public GifPlayer() {
         initialize();
     }
 
@@ -66,13 +58,5 @@ public class GifPlayer extends JLabel {
         } catch (Exception e) {
             errorDialog("无法读取文件 " + path, e);
         }
-    }
-
-    public void start() {
-        this.timer.start();
-    }
-
-    public void stop() {
-        this.timer.stop();
     }
 }
