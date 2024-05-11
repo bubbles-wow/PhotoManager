@@ -284,22 +284,26 @@ public class FileOperationWindow {
                     item.setBackground(BACKGROUND);
                 }
                 if (mode == 3) {
-                    if (!item.isLoad) {
-                        executorService.submit(() -> item.loadPicture());
-                    }
-                    item.isSelected = false;
-                    item.setBackground(BACKGROUND);
-                    this.conflictPanel.add(item);
+//                    if (!item.isLoad) {
+//                        executorService.submit(() -> item.loadPicture());
+//                    }
+//                    item.isSelected = false;
+//                    item.setBackground(BACKGROUND);
+                    ItemView oldItemView = new ItemView(item.getFile(), item.getWidth(), item.getHeight());
+                    executorService.submit(() -> oldItemView.loadPicture());
+                    this.conflictPanel.add(oldItemView);
                 }
                 else {
                     String fileName = item.getFile().getName();
+                    ItemView oldItemView = new ItemView(item.getFile(), item.getWidth(), item.getHeight());
                     ItemView newItemView = new ItemView(new File(Paths.get(this.newPath, fileName).toString()), itemSize.width, itemSize.height);
                     executorService.submit(() -> newItemView.loadPicture());
-                    if (!item.isLoad) {
-                        executorService.submit(() -> item.loadPicture());
-                    }
+//                    if (!item.isLoad) {
+//                        executorService.submit(() -> item.loadPicture());
+//                    }
+                    executorService.submit(() -> oldItemView.loadPicture());
                     // 左边是原文件，右边是新目录中同名的文件
-                    CompareItemView compareItemView = new CompareItemView(item, newItemView);
+                    CompareItemView compareItemView = new CompareItemView(oldItemView, newItemView);
                     compareItemView.setSize(this.conflictPanel.getWidth() - 20, itemSize.height);
                     this.conflictPanel.add(compareItemView);
                 }

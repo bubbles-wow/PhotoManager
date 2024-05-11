@@ -36,7 +36,6 @@ public class GlobalResources {
         } catch (FontFormatException | IOException e) {
             errorDialog("无法加载字体文件：src/res/Segoe Fluent Icons.ttf，部分图标无法显示。", e);
             ICON_FONT = new Font("微软雅黑", Font.PLAIN, 16);
-//            throw new RuntimeException(e);
         }
         String lookAndFeel = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
         try {
@@ -87,6 +86,11 @@ public class GlobalResources {
         UIManager.put("Tree.font", f);
     }
 
+    /**
+     * 错误日志对话框
+     * @param message 错误消息
+     * @param e 异常对象
+     */
     public static void errorDialog(String message, Exception e) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);

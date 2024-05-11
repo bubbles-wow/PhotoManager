@@ -310,7 +310,6 @@ public class ItemView extends JPanel {
             }
             if (comp instanceof JLabel) {
                 comp.setVisible(false);
-                continue;
             }
         }
     }

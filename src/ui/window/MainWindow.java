@@ -2,7 +2,7 @@ package ui.window;
 
 import ui.panel.FileView;
 import ui.panel.Tree;
-import util.ui.component.Button;
+import util.ui.component.IconButton;
 import util.core.*;
 import util.ui.layout.MyLayoutManager;
 
@@ -112,7 +112,7 @@ public class MainWindow {
 //        path.setBounds(30, 0, width - 24, 24);
         path.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
         // 后退
-        Button button1 = new Button("\ue72b", "后退", 24, 24) {
+        IconButton iconButton1 = new IconButton("\ue72b", "后退", 24, 24) {
             @Override
             public void todo() {
                 isUseBackAndForward = true;
@@ -132,7 +132,7 @@ public class MainWindow {
             }
         };
         // 前进
-        Button button2 = new Button("\ue72a", "前进", 24, 24) {
+        IconButton iconButton2 = new IconButton("\ue72a", "前进", 24, 24) {
             @Override
             public void todo() {
                 isUseBackAndForward = true;
@@ -152,7 +152,7 @@ public class MainWindow {
             }
         };
         // 上一级
-        Button button3 = new Button("\ue74a", "上一级", 24, 24) {
+        IconButton iconButton3 = new IconButton("\ue74a", "上一级", 24, 24) {
             @Override
             public void todo() {
                 FileNode currentNode = (FileNode) FILE_TREE.getCurrentNode().getUserObject();
@@ -169,14 +169,14 @@ public class MainWindow {
             }
         };
         // 刷新
-        Button button4 = new Button("\ue72c", "刷新", 24, 24) {
+        IconButton iconButton4 = new IconButton("\ue72c", "刷新", 24, 24) {
             @Override
             public void todo() {
                 fileView.update();
             }
         };
         // 前往
-        Button button5 = new Button("\ue751", "前往", 24, 24) {
+        IconButton iconButton5 = new IconButton("\ue751", "前往", 24, 24) {
             @Override
             public void todo() {
                 File file = new File(path.getText());
@@ -197,17 +197,17 @@ public class MainWindow {
             }
         };
         // 设置图标
-        button1.setFont(GlobalResources.ICON_FONT);
-        button2.setFont(GlobalResources.ICON_FONT);
-        button3.setFont(GlobalResources.ICON_FONT);
-        button4.setFont(GlobalResources.ICON_FONT);
-        button5.setFont(GlobalResources.ICON_FONT);
-        this.pathBar.add(button1);
-        this.pathBar.add(button2);
-        this.pathBar.add(button3);
-        this.pathBar.add(button4);
+        iconButton1.setFont(GlobalResources.ICON_FONT);
+        iconButton2.setFont(GlobalResources.ICON_FONT);
+        iconButton3.setFont(GlobalResources.ICON_FONT);
+        iconButton4.setFont(GlobalResources.ICON_FONT);
+        iconButton5.setFont(GlobalResources.ICON_FONT);
+        this.pathBar.add(iconButton1);
+        this.pathBar.add(iconButton2);
+        this.pathBar.add(iconButton3);
+        this.pathBar.add(iconButton4);
         this.pathBar.add(path);
-        this.pathBar.add(button5);
+        this.pathBar.add(iconButton5);
     }
 
     /**
@@ -225,7 +225,7 @@ public class MainWindow {
                     int height = 4;
                     Component path = null;
                     for (Component comp : pathBarComponents) {
-                        if (comp instanceof Button) {
+                        if (comp instanceof IconButton) {
                             if (width >= main.getWidth() && path != null) {
                                 path.setSize(path.getWidth() - comp.getWidth() - 8, path.getHeight());
                                 width -= comp.getWidth() + 4;

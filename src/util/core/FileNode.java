@@ -5,17 +5,23 @@ import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 
 public class FileNode {
-    private final Icon icon;
+    private Icon icon;
 
     private String name;
 
-    private final File file;
+    private File file;
 
     private long lastModifiedTime;
+
+    private int folderCount = 0;
 
     public boolean isLoaded = false;
 
     public FileNode(File file, String name) {
+        load(file, name);
+    }
+
+    private void load(File file, String name) {
         Icon icon1;
         this.file = file;
         this.lastModifiedTime = file.lastModified();
@@ -31,8 +37,20 @@ public class FileNode {
         return this.lastModifiedTime;
     }
 
-    public void setLastModifiedTime(long lastModifiedTime) {
-        this.lastModifiedTime = lastModifiedTime;
+    public int getFolderCount() {
+        return this.folderCount;
+    }
+
+    public void setFolderCount(int folderCount) {
+        this.folderCount = folderCount;
+    }
+
+    public void reload() {
+        String path = this.file.getAbsolutePath();
+        File newFile = new File(path);
+        if (newFile.lastModified() != this.lastModifiedTime) {
+            load(newFile, FileSystemView.getFileSystemView().getSystemDisplayName(newFile));
+        }
     }
 
     public File getFile() {

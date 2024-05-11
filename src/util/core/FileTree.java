@@ -34,9 +34,11 @@ public class FileTree {
             FileNode fileNode = new FileNode(root, FileSystemView.getFileSystemView().getSystemDisplayName(root));
             if (FileSystemView.getFileSystemView().getSystemDisplayName(root).isEmpty()) {
                 fileNode.setName("损坏的设备");
+                continue;
             }
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(fileNode);
-            EXECUTOR.submit(() -> addNodes(node, 1));
+//            EXECUTOR.submit(() -> addNodes(node, 1));
+            addNodes(node, 0);
             rootNode.add(node);
         }
         this.pathTree = new DefaultTreeModel(rootNode);
@@ -57,11 +59,13 @@ public class FileTree {
         if (subFiles == null) {
             return;
         }
+        int folderCount = 0;
         for (File f : subFiles) {
             if (f.isHidden()) {
                 continue;
             }
             if (f.isDirectory()) {
+                folderCount++;
                 FileNode folder = new FileNode(f, FileSystemView.getFileSystemView().getSystemDisplayName(f));
                 DefaultMutableTreeNode node = new DefaultMutableTreeNode(folder);
                 // 递归调用，遍历文件夹
@@ -71,6 +75,8 @@ public class FileTree {
                 root.add(node);
             }
         }
+        // 添加完设置文件夹数量
+        currentFolder.setFolderCount(folderCount);
     }
 
     /**

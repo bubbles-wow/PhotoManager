@@ -1,6 +1,8 @@
 package ui.panel;
 
 import ui.window.FileOperationWindow;
+import util.ui.component.IconButton;
+import util.ui.component.IconTextButton;
 import util.ui.component.ScrollPane;
 import util.core.FileNode;
 import util.ui.layout.FileViewLayout;
@@ -34,6 +36,7 @@ public class FileView {
     // ==0: undo
     // ==1: copy
     // ==2: cut
+    // ==3: delete
     private int selectedMode = 0;
 
     private final ExecutorService executorService = Executors.newFixedThreadPool(8);
@@ -43,6 +46,8 @@ public class FileView {
     private final JPanel mainPanel = new JPanel();
 
     private final JPanel fileView = new JPanel();
+
+    private final JPanel toolBar = new JPanel();
 
     private final ScrollPane fileViewScrollPane = new ScrollPane(this.fileView);
 
@@ -89,7 +94,7 @@ public class FileView {
                                     itemView.quitRename();
                                 }
                                 itemView.isSelected = false;
-                                setInfoBar(currentFileCount, --currentSelectedFileCount);
+                                updateInfo(currentFileCount, --currentSelectedFileCount);
                                 itemView.setBackground(BACKGROUND);
                             }
                         }
@@ -97,7 +102,7 @@ public class FileView {
                         // if (current instanceof ItemView item) {
                         // item.isSelected = false;
                         // if (currentSelectedFileCount > 0) {
-                        // setInfoBar(currentFileCount, --currentSelectedFileCount);
+                        // updateInfo(currentFileCount, --currentSelectedFileCount);
                         // }
                         // }
                     }
@@ -110,14 +115,14 @@ public class FileView {
                             // 再次单击取消选中
                             if (item.isSelected) {
                                 item.isSelected = false;
-                                setInfoBar(currentFileCount, --currentSelectedFileCount);
+                                updateInfo(currentFileCount, --currentSelectedFileCount);
                                 item.setBackground(BACKGROUND);
                                 lastSelected.remove(item);
                             }
                             // 选中
                             else {
                                 item.isSelected = true;
-                                setInfoBar(currentFileCount, ++currentSelectedFileCount);
+                                updateInfo(currentFileCount, ++currentSelectedFileCount);
                                 item.setBackground(SELECT);
                                 lastSelected.add(item);
                                 if (lastSelected.size() > 1) {
@@ -135,7 +140,7 @@ public class FileView {
                                             if (component instanceof ItemView itemView) {
                                                 if (!itemView.isRenaming && itemView.equals(rename)) {
                                                     itemView.isSelected = false;
-                                                    setInfoBar(currentFileCount, --currentSelectedFileCount);
+                                                    updateInfo(currentFileCount, --currentSelectedFileCount);
                                                     lastSelected.remove(itemView);
                                                 }
                                             }
@@ -183,7 +188,7 @@ public class FileView {
                                         }
                                         itemView.isSelected = false;
                                         itemView.setBackground(BACKGROUND);
-                                        setInfoBar(currentFileCount, --currentSelectedFileCount);
+                                        updateInfo(currentFileCount, --currentSelectedFileCount);
                                     }
                                 }
                                 lastSelected.clear();
@@ -228,7 +233,7 @@ public class FileView {
                                                 }
                                                 itemView.isSelected = false;
                                                 itemView.setBackground(BACKGROUND);
-                                                setInfoBar(currentFileCount, --currentSelectedFileCount);
+                                                updateInfo(currentFileCount, --currentSelectedFileCount);
                                             }
                                         }
                                         lastSelected.clear();
@@ -237,7 +242,7 @@ public class FileView {
                                     item.isSelected = true;
                                     item.setBackground(SELECT);
                                     lastSelected.add(item);
-                                    setInfoBar(currentFileCount, ++currentSelectedFileCount);
+                                    updateInfo(currentFileCount, ++currentSelectedFileCount);
                                 } else {
                                     // 右键选中的文件在选中列表中
                                     if (lastSelected.size() > 1) {
@@ -255,7 +260,7 @@ public class FileView {
                                 if (!item.getFile().exists()) {
                                     lastSelected.remove(item);
                                     currentFileCount--;
-                                    setInfoBar(currentFileCount, --currentSelectedFileCount);
+                                    updateInfo(currentFileCount, --currentSelectedFileCount);
                                     int currentY = fileViewScrollPane.getVerticalScrollBar().getValue();
                                     update();
                                     fileViewScrollPane.getVerticalScrollBar().setValue(currentY);
@@ -279,6 +284,109 @@ public class FileView {
         initialMainPanel();
     }
 
+    private void initialToolBar() {
+        this.toolBar.setBackground(BACKGROUND);
+        this.toolBar.setLayout(new FlowLayout() {
+            @Override
+            public void layoutContainer(Container target) {
+                int leftX = 10;
+                int rightX = target.getWidth() - 10;
+                for(Component comp : target.getComponents()) {
+                    if(comp instanceof IconButton) {
+                        int width = comp.getWidth();
+                        int height = comp.getHeight();
+                        comp.setBounds(leftX, 4, width, height);
+                        leftX += width + 10;
+                    }
+                    else if (comp instanceof IconTextButton) {
+                        int width = comp.getWidth();
+                        int height = comp.getHeight();
+                        comp.setBounds(rightX - width, 4, width, height);
+                        rightX -= width + 10;
+                    }
+                }
+            }
+        });
+        this.toolBar.setBorder(BorderFactory.createMatteBorder(1, 1, 0, 1, Color.GRAY));
+        this.toolBar.setPreferredSize(new Dimension(this.mainPanel.getWidth(), 32));
+        IconTextButton open = new IconTextButton("\uee4a", "幻灯片放映", 96, 24) {
+            @Override
+            public void todo() {
+                open();
+            }
+
+        };
+        IconButton copy = new IconButton("\ue8c8", "复制", 24, 24) {
+            @Override
+            public void todo() {
+                copy();
+            }
+        };
+        IconButton cut = new IconButton("\ue8c6", "剪切", 24, 24) {
+            @Override
+            public void todo() {
+                cut();
+            }
+
+        };
+        IconButton paste = new IconButton("\ue77f", "粘贴", 24, 24) {
+            @Override
+            public void todo() {
+                paste();
+            }
+
+        };
+        IconButton rename = new IconButton("\ue8ac", "重命名", 24, 24) {
+            @Override
+            public void todo() {
+                rename();
+            }
+        };
+        IconButton delete = new IconButton("\ue74d", "删除", 24, 24) {
+            @Override
+            public void todo() {
+                delete();
+            }
+        };
+        this.toolBar.add(open);
+        this.toolBar.add(copy);
+        this.toolBar.add(cut);
+        this.toolBar.add(paste);
+        this.toolBar.add(rename);
+        this.toolBar.add(delete);
+        this.updateToolBar(0, 0);
+    }
+
+    /**
+     * 更新工具栏的按钮状态
+     * @param totalCount 当前总文件数
+     * @param selectedCount 当前选中的文件数
+     */
+    private void updateToolBar(int totalCount, int selectedCount) {
+        if (this.toolBar.getComponents().length < 6) {
+            return;
+        }
+        int pasteCount = this.selected.size();
+        this.toolBar.getComponent(0).disable();
+        this.toolBar.getComponent(1).disable();
+        this.toolBar.getComponent(2).disable();
+        this.toolBar.getComponent(3).disable();
+        this.toolBar.getComponent(4).disable();
+        this.toolBar.getComponent(5).disable();
+        if (pasteCount != 0) {
+            this.toolBar.getComponent(3).enable();
+        }
+        if (selectedCount != 0) {
+            this.toolBar.getComponent(1).enable();
+            this.toolBar.getComponent(2).enable();
+            this.toolBar.getComponent(4).enable();
+            this.toolBar.getComponent(5).enable();
+        }
+        if (totalCount != 0) {
+            this.toolBar.getComponent(0).enable();
+        }
+    }
+
     /**
      * 初始化图片预览滚动面板
      */
@@ -299,69 +407,31 @@ public class FileView {
         this.infoBar.setBackground(BACKGROUND);
         this.infoBar.setFont(new Font("微软雅黑", Font.PLAIN, 12));
         this.infoBar.setBorder(BorderFactory.createMatteBorder(0, 1, 1, 1, Color.GRAY));
-        this.setInfoBar(0, 0);
+        this.updateInfo(0, 0);
     }
 
     private void initialPopupMenu() {
-        this.popupMenu.open.addActionListener(e -> {
-            if (lastSelected.isEmpty()) {
-                return;
-            }
-            // ((ItemView) lastSelected.getFirst()).open();
-        });
-        this.popupMenu.copy.addActionListener(e -> {
-            if (!selected.isEmpty()) {
-                selected.clear();
-            }
-            selected.addAll(lastSelected);
-            selectedMode = 1;
-        });
-        this.popupMenu.copyTo.addActionListener(e -> {
-            for (Component component : selected) {
-                if (component instanceof ItemView itemView) {
-                    // itemView.copyTo();
-                }
-            }
-        });
-        this.popupMenu.cut.addActionListener(e -> {
-            if (!selected.isEmpty()) {
-                selected.clear();
-            }
-            selected.addAll(lastSelected);
-            selectedMode = 2;
-        });
-        this.popupMenu.cutTo.addActionListener(e -> {
-            for (Component component : selected) {
-                if (component instanceof ItemView itemView) {
-                    // itemView.cutTo();
-                }
-            }
-        });
-        this.popupMenu.paste.addActionListener(e -> {
-            if (selected.isEmpty()) {
-                return;
-            }
-            new FileOperationWindow(selected, selectedMode, currentFile.getAbsolutePath(), false, false);
-            selected.clear();
-        });
-        this.popupMenu.rename.addActionListener(e -> {
-            if (lastSelected.size() > 1) {
-                return;
-            }
-            ((ItemView) lastSelected.getFirst()).rename();
-        });
-        this.popupMenu.multiRename.addActionListener(e -> {
-            ;
-        });
-        this.popupMenu.delete.addActionListener(e -> {
-            if (lastSelected.isEmpty()) {
-                return;
-            }
-            new FileOperationWindow(lastSelected, 3);
-            lastSelected.clear();
-            this.currentSelectedFileCount = 0;
-            setInfoBar(currentFileCount, 0);
-        });
+        this.popupMenu.open.addActionListener(e -> this.open());
+        this.popupMenu.copy.addActionListener(e -> this.copy());
+//        this.popupMenu.copyTo.addActionListener(e -> {
+//            for (Component component : selected) {
+//                if (component instanceof ItemView itemView) {
+//                    // itemView.copyTo();
+//                }
+//            }
+//        });
+        this.popupMenu.cut.addActionListener(e -> this.cut());
+//        this.popupMenu.cutTo.addActionListener(e -> {
+//            for (Component component : selected) {
+//                if (component instanceof ItemView itemView) {
+//                    // itemView.cutTo();
+//                }
+//            }
+//        });
+        this.popupMenu.paste.addActionListener(e -> this.paste());
+        this.popupMenu.rename.addActionListener(e -> this.rename());
+        this.popupMenu.multiRename.addActionListener(e -> this.multiRename());
+        this.popupMenu.delete.addActionListener(e -> this.delete());
     }
 
     /**
@@ -371,9 +441,81 @@ public class FileView {
         this.initialFileViewScrollPane();
         this.initialInfoBar();
         this.initialPopupMenu();
+        this.initialToolBar();
         this.mainPanel.setLayout(new BorderLayout());
         this.mainPanel.add(this.fileViewScrollPane, BorderLayout.CENTER);
         this.mainPanel.add(this.infoBar, BorderLayout.SOUTH);
+        this.mainPanel.add(this.toolBar, BorderLayout.NORTH);
+    }
+
+    /**
+     * 文件打开
+     */
+    private void open() {
+
+    }
+
+    /**
+     * 文件复制
+     */
+    private void copy() {
+        if (!this.selected.isEmpty()) {
+            this.selected.clear();
+        }
+        this.selected.addAll(this.lastSelected);
+        this.selectedMode = 1;
+    }
+
+    /**
+     * 文件移动
+     */
+    private void cut() {
+        if (!this.selected.isEmpty()) {
+            this.selected.clear();
+        }
+        this.selected.addAll(this.lastSelected);
+        this.selectedMode = 2;
+    }
+
+    /**
+     * 文件粘贴
+     */
+    private void paste() {
+        if (this.selected.isEmpty()) {
+            return;
+        }
+        new FileOperationWindow(this.selected, this.selectedMode, this.currentFile.getAbsolutePath(), false, false);
+        this.selected.clear();
+    }
+
+    /**
+     * 文件重命名
+     */
+    private void rename() {
+        if (this.lastSelected.size() > 1) {
+            return;
+        }
+        ((ItemView) this.lastSelected.getFirst()).rename();
+    }
+
+    /**
+     * 批量重命名
+     */
+    private void multiRename() {
+
+    }
+
+    /**
+     * 文件删除操作
+     */
+    private void delete() {
+        if (this.lastSelected.isEmpty()) {
+            return;
+        }
+        new FileOperationWindow(this.lastSelected, 3);
+        this.lastSelected.clear();
+        this.currentSelectedFileCount = 0;
+        this.updateInfo(this.currentFileCount, 0);
     }
 
     /**
@@ -382,8 +524,9 @@ public class FileView {
      * @param totalCount    当前文件夹中的图片文件总数
      * @param selectedCount 已选中的文件数
      */
-    public void setInfoBar(int totalCount, int selectedCount) {
+    public void updateInfo(int totalCount, int selectedCount) {
         this.infoBar.setText(" " + totalCount + " 张图片 | " + selectedCount + " 张已选中");
+        this.updateToolBar(totalCount, selectedCount);
     }
 
     /**
@@ -431,11 +574,10 @@ public class FileView {
                 label.setHorizontalAlignment(SwingConstants.CENTER);
                 this.fileView.add(label);
                 this.isLoading = false;
-            } else {
-                this.executorService.submit(() -> reloadViewImage(0));
             }
+            this.executorService.submit(() -> reloadViewImage(0));
         }
-        this.setInfoBar(this.currentFileCount, 0);
+        this.updateInfo(this.currentFileCount, 0);
     }
 
     /**
