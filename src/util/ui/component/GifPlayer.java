@@ -16,7 +16,7 @@ public class GifPlayer extends JLabel {
     private int index;
 
     public GifPlayer() {
-        initialize();
+        this.initialize();
     }
 
     private ImageIcon getResizeIcon(BufferedImage image, int width, int height) {
@@ -35,19 +35,19 @@ public class GifPlayer extends JLabel {
     }
 
     public void load(String path, int width, int height) {
-        setText("");
-        setSize(width, height);
+        this.setSize(width, height);
         try {
             GifDecoder decoder = new GifDecoder();
             decoder.read(path);
             int frameCount = decoder.getFrameCount();
             if (frameCount == 1) {
-                setIcon(getResizeIcon(decoder.getFrame(0), width, height));
+                this.setIcon(getResizeIcon(decoder.getFrame(0), width, height));
+                this.setText("");
                 return;
             }
             this.icons = new ImageIcon[frameCount];
             for (int i = 0; i < frameCount; i++) {
-                this.icons[i] = getResizeIcon(decoder.getFrame(i), width, height);
+                this.icons[i] = this.getResizeIcon(decoder.getFrame(i), width, height);
             }
             int delay = decoder.getDelay(0);
             this.timer = new Timer(delay, e -> {
@@ -58,5 +58,6 @@ public class GifPlayer extends JLabel {
         } catch (Exception e) {
             errorDialog("无法读取文件 " + path, e);
         }
+        this.setText("");
     }
 }

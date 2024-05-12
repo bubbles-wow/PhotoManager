@@ -17,4 +17,13 @@ public class ScrollPane extends JScrollPane {
         super.setBounds(x, y, width, height);
         this.comp.setSize(width - 20, comp.getHeight());
     }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.dispose();
+    }
 }

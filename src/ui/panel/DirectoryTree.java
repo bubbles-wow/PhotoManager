@@ -12,9 +12,9 @@ import java.io.File;
 
 import static util.core.GlobalResources.*;
 
-public class Tree extends JTree {
+public class DirectoryTree extends JTree {
 
-    public Tree(DefaultTreeModel tree) {
+    public DirectoryTree(DefaultTreeModel tree) {
         super(tree);
         this.setRootVisible(false);
         this.setShowsRootHandles(true);
@@ -88,7 +88,7 @@ public class Tree extends JTree {
                     }
                 }
                 try {
-                    int sleepTime = fileNode.getFolderCount() * 10;
+                    int sleepTime = fileNode.getFolderCount() * 20;
                     Thread.sleep(sleepTime);
                 } catch (InterruptedException e) {
                     errorDialog("等待目录树加载线程结束时出现错误", e);

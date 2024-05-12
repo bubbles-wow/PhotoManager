@@ -1,6 +1,7 @@
 package ui.panel;
 
 import ui.window.FileOperationWindow;
+import ui.window.MultiRenameWindow;
 import util.ui.component.IconButton;
 import util.ui.component.IconTextButton;
 import util.ui.component.ScrollPane;
@@ -23,7 +24,11 @@ public class FileView {
 
     private int currentFileCount;
 
+    private long currentFileSize;
+
     private int currentSelectedFileCount;
+
+    private long currentSelectedFileSize;
 
     private boolean isLoading = false;
 
@@ -32,6 +37,8 @@ public class FileView {
     private final List<Component> lastSelected = new ArrayList<>();
 
     private final List<Component> selected = new ArrayList<>();
+
+    private final List<PhotoViewItem> lastLoaded = new ArrayList<>();
 
     // ==0: undo
     // ==1: copy
@@ -83,19 +90,20 @@ public class FileView {
                     // 取消选中列表所有文件的选中状态
                     if (!lastSelected.isEmpty() && e.getClickCount() == 1 && !isSelecting) {
                         for (Component component : lastSelected) {
-                            if (component instanceof ItemView itemView) {
+                            if (component instanceof PhotoViewItem photoViewItem) {
                                 // 当前选中的文件不取消
                                 // if (current.equals(itemView)) {
                                 // continue;
                                 // }
                                 // 取消重命名状态
-                                if (itemView.isRenaming) {
-                                    itemView.isRenaming = false;
-                                    itemView.quitRename();
+                                if (photoViewItem.isRenaming) {
+                                    photoViewItem.isRenaming = false;
+                                    photoViewItem.quitRename();
                                 }
-                                itemView.isSelected = false;
+                                photoViewItem.isSelected = false;
+                                currentSelectedFileSize -= photoViewItem.getFile().length();
                                 updateInfo(currentFileCount, --currentSelectedFileCount);
-                                itemView.setBackground(BACKGROUND);
+                                photoViewItem.setBackground(BACKGROUND);
                             }
                         }
                         lastSelected.clear();
@@ -106,7 +114,7 @@ public class FileView {
                         // }
                         // }
                     }
-                    if (current instanceof ItemView item) {
+                    if (current instanceof PhotoViewItem item) {
                         // view.openFile();
                         // if (e.getClickCount() == 2) {
                         //
@@ -115,6 +123,7 @@ public class FileView {
                             // 再次单击取消选中
                             if (item.isSelected) {
                                 item.isSelected = false;
+                                currentSelectedFileSize -= item.getFile().length();
                                 updateInfo(currentFileCount, --currentSelectedFileCount);
                                 item.setBackground(BACKGROUND);
                                 lastSelected.remove(item);
@@ -122,26 +131,28 @@ public class FileView {
                             // 选中
                             else {
                                 item.isSelected = true;
+                                currentSelectedFileSize += item.getFile().length();
                                 updateInfo(currentFileCount, ++currentSelectedFileCount);
                                 item.setBackground(SELECT);
                                 lastSelected.add(item);
                                 if (lastSelected.size() > 1) {
-                                    ItemView rename = null;
+                                    PhotoViewItem rename = null;
                                     for (Component component : lastSelected) {
-                                        if (component instanceof ItemView itemView) {
-                                            if (itemView.isRenaming) {
-                                                rename = itemView;
+                                        if (component instanceof PhotoViewItem photoViewItem) {
+                                            if (photoViewItem.isRenaming) {
+                                                rename = photoViewItem;
                                                 break;
                                             }
                                         }
                                     }
                                     if (rename != null) {
                                         for (Component component : lastSelected) {
-                                            if (component instanceof ItemView itemView) {
-                                                if (!itemView.isRenaming && itemView.equals(rename)) {
-                                                    itemView.isSelected = false;
+                                            if (component instanceof PhotoViewItem photoViewItem) {
+                                                if (!photoViewItem.isRenaming && photoViewItem.equals(rename)) {
+                                                    photoViewItem.isSelected = false;
+                                                    currentSelectedFileSize -= photoViewItem.getFile().length();
                                                     updateInfo(currentFileCount, --currentSelectedFileCount);
-                                                    lastSelected.remove(itemView);
+                                                    lastSelected.remove(photoViewItem);
                                                 }
                                             }
                                         }
@@ -181,13 +192,14 @@ public class FileView {
                             // 清除已选中文件列表
                             if (!lastSelected.isEmpty()) {
                                 for (Component component : lastSelected) {
-                                    if (component instanceof ItemView itemView) {
-                                        if (itemView.isRenaming) {
-                                            itemView.isRenaming = false;
-                                            itemView.quitRename();
+                                    if (component instanceof PhotoViewItem photoViewItem) {
+                                        if (photoViewItem.isRenaming) {
+                                            photoViewItem.isRenaming = false;
+                                            photoViewItem.quitRename();
                                         }
-                                        itemView.isSelected = false;
-                                        itemView.setBackground(BACKGROUND);
+                                        photoViewItem.isSelected = false;
+                                        photoViewItem.setBackground(BACKGROUND);
+                                        currentSelectedFileSize -= photoViewItem.getFile().length();
                                         updateInfo(currentFileCount, --currentSelectedFileCount);
                                     }
                                 }
@@ -202,14 +214,21 @@ public class FileView {
                             popupMenu.paste.setVisible(false);
                             popupMenu.separator2.setVisible(false);
                             popupMenu.rename.setVisible(false);
+                            popupMenu.multiRename.setVisible(false);
                             popupMenu.separator3.setVisible(false);
                             popupMenu.delete.setVisible(false);
                             if (!selected.isEmpty()) {
                                 popupMenu.paste.setVisible(true);
-                                popupMenu.separator2.setVisible(true);
+                                if (currentFileCount > 1) {
+                                    popupMenu.separator2.setVisible(true);
+                                    popupMenu.multiRename.setVisible(true);
+                                }
+                            }
+                            else if (currentFileCount > 1) {
+                                popupMenu.multiRename.setVisible(true);
                             }
                         } else {
-                            if (comp instanceof ItemView item) {
+                            if (comp instanceof PhotoViewItem item) {
                                 popupMenu.open.setVisible(true);
                                 popupMenu.separator1.setVisible(true);
                                 popupMenu.copy.setVisible(true);
@@ -219,6 +238,7 @@ public class FileView {
                                 popupMenu.paste.setVisible(false);
                                 popupMenu.separator2.setVisible(true);
                                 popupMenu.rename.setVisible(true);
+                                popupMenu.multiRename.setVisible(false);
                                 popupMenu.separator3.setVisible(true);
                                 popupMenu.delete.setVisible(true);
                                 // 右键选中文件
@@ -226,13 +246,14 @@ public class FileView {
                                     // 已有其他文件被选中，清除选中状态
                                     if (!lastSelected.isEmpty()) {
                                         for (Component component : lastSelected) {
-                                            if (component instanceof ItemView itemView) {
-                                                if (itemView.isRenaming) {
-                                                    itemView.isRenaming = false;
-                                                    itemView.quitRename();
+                                            if (component instanceof PhotoViewItem photoViewItem) {
+                                                if (photoViewItem.isRenaming) {
+                                                    photoViewItem.isRenaming = false;
+                                                    photoViewItem.quitRename();
                                                 }
-                                                itemView.isSelected = false;
-                                                itemView.setBackground(BACKGROUND);
+                                                photoViewItem.isSelected = false;
+                                                photoViewItem.setBackground(BACKGROUND);
+                                                currentSelectedFileSize -= photoViewItem.getFile().length();
                                                 updateInfo(currentFileCount, --currentSelectedFileCount);
                                             }
                                         }
@@ -242,6 +263,7 @@ public class FileView {
                                     item.isSelected = true;
                                     item.setBackground(SELECT);
                                     lastSelected.add(item);
+                                    currentSelectedFileSize += item.getFile().length();
                                     updateInfo(currentFileCount, ++currentSelectedFileCount);
                                 } else {
                                     // 右键选中的文件在选中列表中
@@ -249,6 +271,7 @@ public class FileView {
                                         popupMenu.open.setVisible(false);
                                         popupMenu.separator1.setVisible(false);
                                         popupMenu.rename.setVisible(false);
+                                        popupMenu.multiRename.setVisible(true);
                                     } else if (lastSelected.size() == 1) {
                                         // 切换为当前选中文件
                                         if (lastSelected.getFirst().equals(item)) {
@@ -260,6 +283,8 @@ public class FileView {
                                 if (!item.getFile().exists()) {
                                     lastSelected.remove(item);
                                     currentFileCount--;
+                                    currentFileSize -= item.getFile().length();
+                                    currentSelectedFileSize -= item.getFile().length();
                                     updateInfo(currentFileCount, --currentSelectedFileCount);
                                     int currentY = fileViewScrollPane.getVerticalScrollBar().getValue();
                                     update();
@@ -269,7 +294,6 @@ public class FileView {
                             }
                         }
                         // 非空文件夹默认显示
-                        popupMenu.multiRename.setVisible(true);
                     }
                     popupMenu.show(fileView, e.getX(), e.getY());
                 }
@@ -281,6 +305,8 @@ public class FileView {
         }
         this.currentSelectedFileCount = 0;
         this.currentFileCount = 0;
+        this.currentSelectedFileSize = 0;
+        this.currentFileSize = 0;
         initialMainPanel();
     }
 
@@ -452,7 +478,6 @@ public class FileView {
      * 文件打开
      */
     private void open() {
-
     }
 
     /**
@@ -464,6 +489,7 @@ public class FileView {
         }
         this.selected.addAll(this.lastSelected);
         this.selectedMode = 1;
+        this.updateToolBar(this.currentFileCount, this.currentSelectedFileCount);
     }
 
     /**
@@ -475,6 +501,7 @@ public class FileView {
         }
         this.selected.addAll(this.lastSelected);
         this.selectedMode = 2;
+        this.updateToolBar(this.currentFileCount, this.currentSelectedFileCount);
     }
 
     /**
@@ -486,23 +513,32 @@ public class FileView {
         }
         new FileOperationWindow(this.selected, this.selectedMode, this.currentFile.getAbsolutePath(), false, false);
         this.selected.clear();
+        this.currentSelectedFileCount = 0;
+        this.currentSelectedFileSize = 0;
+        this.updateInfo(this.currentFileCount, 0);
     }
 
     /**
      * 文件重命名
      */
     private void rename() {
+        // 使用批量重命名
         if (this.lastSelected.size() > 1) {
-            return;
+            new MultiRenameWindow(this.lastSelected);
         }
-        ((ItemView) this.lastSelected.getFirst()).rename();
+        ((PhotoViewItem) this.lastSelected.getFirst()).rename();
     }
 
     /**
      * 批量重命名
      */
     private void multiRename() {
-
+        if (this.lastSelected.size() < 2) {
+            new MultiRenameWindow(List.of(this.fileView.getComponents()));
+        }
+        else {
+            new MultiRenameWindow(this.lastSelected);
+        }
     }
 
     /**
@@ -515,6 +551,7 @@ public class FileView {
         new FileOperationWindow(this.lastSelected, 3);
         this.lastSelected.clear();
         this.currentSelectedFileCount = 0;
+        this.currentSelectedFileSize = 0;
         this.updateInfo(this.currentFileCount, 0);
     }
 
@@ -525,7 +562,26 @@ public class FileView {
      * @param selectedCount 已选中的文件数
      */
     public void updateInfo(int totalCount, int selectedCount) {
-        this.infoBar.setText(" " + totalCount + " 张图片 | " + selectedCount + " 张已选中");
+        String[] signs = new String[]{"B", "K", "M", "G", "T"};
+        int index = 0;
+        double size = this.currentFileSize;
+        double selectedSize = this.currentSelectedFileSize;
+        while (size > 1024) {
+            size /= 1024;
+            index++;
+            if (index == 4) {
+                break;
+            }
+        }
+        int selectedIndex = 0;
+        while (selectedSize > 1024) {
+            selectedSize /= 1024;
+            selectedIndex++;
+            if (index == 4) {
+                break;
+            }
+        }
+        this.infoBar.setText(String.format(" %d 张图片 (%.2f %s) | %d 张已选中 (%.2f %s)", totalCount, size, signs[index], selectedCount, selectedSize, signs[selectedIndex]));
         this.updateToolBar(totalCount, selectedCount);
     }
 
@@ -550,9 +606,14 @@ public class FileView {
             if (!this.lastSelected.isEmpty()) {
                 this.lastSelected.clear();
             }
+            if (!this.lastLoaded.isEmpty()) {
+                this.lastLoaded.clear();
+            }
             System.gc();
             this.isLoading = true;
             this.currentFileCount = 0;
+            this.currentFileSize = 0;
+            this.currentSelectedFileSize = 0;
             File[] folder = this.currentFile.listFiles();
             if (folder != null) {
                 for (File file : folder) {
@@ -563,9 +624,10 @@ public class FileView {
                         // 保证排序正确，不使用多线程
                         addImage(file);
                         this.currentFileCount++;
+                        this.currentFileSize += file.length();
                     }
                 }
-                this.executorService.submit(() -> this.isLoading = false);
+                this.isLoading = false;
             }
             if (this.currentFileCount == 0) {
                 JLabel label = new JLabel("没有图片");
@@ -586,7 +648,16 @@ public class FileView {
      * @param file 图片文件
      */
     private void addImage(File file) {
-        ItemView view = new ItemView(file, itemSize.width, itemSize.height);
+//        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+//            @Override
+//            protected Void doInBackground() {
+//                ItemView view = new ItemView(file, itemSize.width, itemSize.height);
+//                fileView.add(view);
+//                return null;
+//            }
+//        };
+//        worker.execute();
+        PhotoViewItem view = new PhotoViewItem(file, itemSize.width, itemSize.height);
         this.fileView.add(view);
     }
 
@@ -608,7 +679,6 @@ public class FileView {
         if (fileView.getHeight() < fileViewScrollPane.getHeight()) {
             this.fileView.setSize(fileView.getWidth(), fileViewScrollPane.getHeight());
         }
-        this.fileView.repaint();
     }
 
     /**
@@ -634,23 +704,56 @@ public class FileView {
             this.fileView.setSize(this.fileView.getWidth(), panelNewHeight);
             this.fileViewScrollPane.getVerticalScrollBar().setValue(oldValue);
         }
+        // 预加载不在可视范围的图片
         start -= lineCount;
-        end += lineCount;
-        while (this.currentFileCount != 0 && this.fileView.getComponents().length == 0) {
-            continue;
+        if (start < 0) {
+            start = 0;
         }
-        for (int i = 0; i < this.fileView.getComponents().length; i++) {
+        end += lineCount;
+//        while (this.currentFileCount != 0 && this.fileView.getComponents().length == 0) {
+//            continue;
+//        }
+//        for (int i = 0; i < this.fileView.getComponents().length; i++) {
+//            if (i >= this.fileView.getComponents().length) {
+//                break;
+//            }
+//            if (this.fileView.getComponent(i) instanceof ItemView view) {
+//                if (i >= start && i < end) {
+//                    if (!view.isLoad) {
+//                        executorService.submit(() -> view.loadPicture());
+//                        view.setVisible(true);
+//                    }
+//                } else if (view.isLoad) {
+//                    executorService.submit(() -> view.loadIcon());
+//                    view.setVisible(false);
+//                }
+//            }
+//        }
+        // 取消不在当前显示范围的图片的加载
+        for (int i = 0; i < this.lastLoaded.size(); i++) {
+            int index = List.of(this.fileView.getComponents()).indexOf(this.lastLoaded.get(i));
+            if (index == -1) {
+                this.lastLoaded.remove(i);
+                i--;
+                continue;
+            }
+            if (index < start || index > end) {
+                PhotoViewItem view = (PhotoViewItem) this.fileView.getComponent(index);
+                if (view.isLoad) {
+                    executorService.submit(() -> view.loadIcon());
+                }
+            }
+        }
+        // 加载当前范围的图片
+        for (int i = start; i < end + 1; i++) {
             if (i >= this.fileView.getComponents().length) {
                 break;
             }
-            if (this.fileView.getComponent(i) instanceof ItemView view) {
-                if (i >= start && i < end) {
-                    if (!view.isLoad) {
-                        executorService.submit(() -> view.loadPicture());
-                        view.isLoad = true;
-                    }
-                } else if (view.isLoad) {
-                    executorService.submit(() -> view.loadIcon());
+            if (this.fileView.getComponent(i) instanceof PhotoViewItem view) {
+                if (!view.isLoad) {
+                    view.isLoad = true;
+                    this.executorService.submit(() -> view.loadPicture());
+                    this.lastLoaded.add(view);
                 }
             }
         }

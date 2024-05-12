@@ -14,7 +14,7 @@ import java.nio.file.*;
 
 import static util.core.GlobalResources.*;
 
-public class ItemView extends JPanel {
+public class PhotoViewItem extends JPanel {
 
     private File file;
 
@@ -30,7 +30,7 @@ public class ItemView extends JPanel {
 
     private boolean isHover = false;
 
-    public ItemView(File file, int width, int height) {
+    public PhotoViewItem(File file, int width, int height) {
         initialItem(file, width, height);
         this.setBackground(BACKGROUND);
         this.addMouseListener(new MouseAdapter() {
@@ -73,7 +73,7 @@ public class ItemView extends JPanel {
                     }
                 }
                 // 鼠标事件转发给面板
-                Point parentPoint = SwingUtilities.convertPoint(ItemView.this, e.getPoint(), getParent());
+                Point parentPoint = SwingUtilities.convertPoint(PhotoViewItem.this, e.getPoint(), getParent());
                 MouseEvent parent = new MouseEvent(getParent(), e.getID(), e.getWhen(), e.getModifiersEx(),
                         parentPoint.x,
                         parentPoint.y, e.getClickCount(), e.isPopupTrigger(), e.getButton());

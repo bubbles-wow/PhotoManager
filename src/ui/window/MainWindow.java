@@ -1,7 +1,7 @@
 package ui.window;
 
 import ui.panel.FileView;
-import ui.panel.Tree;
+import ui.panel.DirectoryTree;
 import util.ui.component.IconButton;
 import util.core.*;
 import util.ui.layout.MyLayoutManager;
@@ -32,12 +32,6 @@ public class MainWindow {
         initialMainWindow(width, height);
         // 对当前打开的节点进行监听
         FILE_TREE.addListener((newNode) -> {
-            if (isUseBackAndForward) {
-                fileView.setCurrentFile(newNode);
-                fileView.update();
-                isUseBackAndForward = false;
-                return;
-            }
             FileNode node = (FileNode) newNode.getUserObject();
             for (Component comp : pathBar.getComponents()) {
                 if (comp instanceof JTextField) {
@@ -45,7 +39,15 @@ public class MainWindow {
                 }
             }
             fileView.setCurrentFile(newNode);
-            if (point < openedNodes.size() - 1) {
+            if (isUseBackAndForward) {
+//                fileView.setCurrentFile(newNode);
+                fileView.update();
+                isUseBackAndForward = false;
+                return;
+            }if (openedNodes.isEmpty()) {
+                openedNodes.add(newNode);
+            }
+            else if (point < openedNodes.size() - 1) {
                 point++;
                 openedNodes.set(point, newNode);
                 if (openedNodes.size() > point + 1) {
@@ -85,7 +87,7 @@ public class MainWindow {
         initialPathBar(width);
         this.main = new JPanel(new MainWindowLayout());
         this.main.setSize(width, height);
-        JScrollPane pathTreePane = new JScrollPane(new Tree(FILE_TREE.getPathTree()));
+        JScrollPane pathTreePane = new JScrollPane(new DirectoryTree(FILE_TREE.getPathTree()));
         pathTreePane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         this.fileView = new FileView();
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
@@ -119,15 +121,6 @@ public class MainWindow {
                 if (point > 0) {
                     point--;
                     FILE_TREE.setCurrentNode(openedNodes.get(point));
-                    fileView.update();
-                    FileNode currentNode = (FileNode) FILE_TREE.getCurrentNode().getUserObject();
-                    path.setText(currentNode.getFile().toString());
-                    for (Component comp : main.getComponents()) {
-                        if (comp instanceof JSplitPane) {
-                            comp.revalidate();
-                            comp.repaint();
-                        }
-                    }
                 }
             }
         };
@@ -139,15 +132,6 @@ public class MainWindow {
                 if (point < openedNodes.size() - 1) {
                     point++;
                     FILE_TREE.setCurrentNode(openedNodes.get(point));
-                    fileView.update();
-                    FileNode currentNode = (FileNode) FILE_TREE.getCurrentNode().getUserObject();
-                    path.setText(currentNode.getFile().toString());
-                    for (Component comp : main.getComponents()) {
-                        if (comp instanceof JSplitPane) {
-                            comp.revalidate();
-                            comp.repaint();
-                        }
-                    }
                 }
             }
         };
@@ -158,14 +142,10 @@ public class MainWindow {
                 FileNode currentNode = (FileNode) FILE_TREE.getCurrentNode().getUserObject();
                 String currentPath = currentNode.getFile().toString();
                 String parentPath = currentPath.substring(0, currentPath.lastIndexOf("\\"));
-                FILE_TREE.setCurrentNode(FILE_TREE.searchNode(parentPath));
-                path.setText(parentPath);
-                for (Component comp : main.getComponents()) {
-                    if (comp instanceof JSplitPane) {
-                        comp.revalidate();
-                        comp.repaint();
-                    }
+                if (parentPath.equals(currentPath.replace("\\", ""))) {
+                    return;
                 }
+                FILE_TREE.setCurrentNode(FILE_TREE.searchNode(parentPath));
             }
         };
         // 刷新
@@ -186,13 +166,6 @@ public class MainWindow {
                         return;
                     }
                     FILE_TREE.setCurrentNode(FILE_TREE.searchNode(file.toString()));
-                    path.setText(file.toString());
-                }
-                for (Component comp : main.getComponents()) {
-                    if (comp instanceof JSplitPane) {
-                        comp.revalidate();
-                        comp.repaint();
-                    }
                 }
             }
         };

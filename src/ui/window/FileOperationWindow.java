@@ -1,7 +1,7 @@
 package ui.window;
 
-import ui.panel.CompareItemView;
-import ui.panel.ItemView;
+import ui.panel.PhotoComparedItem;
+import ui.panel.PhotoViewItem;
 import util.ui.layout.FileViewLayout;
 import util.ui.layout.MyLayoutManager;
 import util.ui.component.ScrollPane;
@@ -90,7 +90,7 @@ public class FileOperationWindow {
             window.add(progressBar);
             for (int i = 1; i <= files.size(); i++) {
                 info.setText("正在删除第 " + i + " 个文件...");
-                if (conflictingFiles.get(i - 1) instanceof ItemView item) {
+                if (conflictingFiles.get(i - 1) instanceof PhotoViewItem item) {
                     item.delete();
                 }
                 progressBar.setValue(i);
@@ -147,7 +147,7 @@ public class FileOperationWindow {
         this.window.setTitle(control + " " + files.size() + " 个文件...");
         for (int i = 1; i <= this.files.size(); i++) {
             this.info.setText("正在" + control + "第 " + i + " 个文件...");
-            if (files.get(i - 1) instanceof ItemView item) {
+            if (files.get(i - 1) instanceof PhotoViewItem item) {
                 // 新文件夹与文件当前所在的文件夹相同，需要添加后缀
                 if (!this.needRename && item.getFile().getParent().equals(newPath)) {
                     this.needRename = true;
@@ -206,7 +206,7 @@ public class FileOperationWindow {
         // 冲突文件列表
         ScrollPane pane = getConflictPane(mode);
         String oldPath = null;
-        if (this.conflictingFiles.getFirst() instanceof ItemView item) {
+        if (this.conflictingFiles.getFirst() instanceof PhotoViewItem item) {
             oldPath = item.getFile().getParent();
         }
         // 说明信息
@@ -277,7 +277,7 @@ public class FileOperationWindow {
         this.conflictPanel.setBackground(BACKGROUND);
         this.conflictPanel.setLayout(new FileViewLayout());
         for (Component component : this.conflictingFiles) {
-            if (component instanceof ItemView item) {
+            if (component instanceof PhotoViewItem item) {
                 // 清除选中的背景色
                 if (item.isSelected) {
                     item.isSelected = false;
@@ -289,23 +289,23 @@ public class FileOperationWindow {
 //                    }
 //                    item.isSelected = false;
 //                    item.setBackground(BACKGROUND);
-                    ItemView oldItemView = new ItemView(item.getFile(), item.getWidth(), item.getHeight());
-                    executorService.submit(() -> oldItemView.loadPicture());
-                    this.conflictPanel.add(oldItemView);
+                    PhotoViewItem oldPhotoViewItem = new PhotoViewItem(item.getFile(), item.getWidth(), item.getHeight());
+                    executorService.submit(() -> oldPhotoViewItem.loadPicture());
+                    this.conflictPanel.add(oldPhotoViewItem);
                 }
                 else {
                     String fileName = item.getFile().getName();
-                    ItemView oldItemView = new ItemView(item.getFile(), item.getWidth(), item.getHeight());
-                    ItemView newItemView = new ItemView(new File(Paths.get(this.newPath, fileName).toString()), itemSize.width, itemSize.height);
-                    executorService.submit(() -> newItemView.loadPicture());
+                    PhotoViewItem oldPhotoViewItem = new PhotoViewItem(item.getFile(), item.getWidth(), item.getHeight());
+                    PhotoViewItem newPhotoViewItem = new PhotoViewItem(new File(Paths.get(this.newPath, fileName).toString()), itemSize.width, itemSize.height);
+                    executorService.submit(() -> newPhotoViewItem.loadPicture());
 //                    if (!item.isLoad) {
 //                        executorService.submit(() -> item.loadPicture());
 //                    }
-                    executorService.submit(() -> oldItemView.loadPicture());
+                    executorService.submit(() -> oldPhotoViewItem.loadPicture());
                     // 左边是原文件，右边是新目录中同名的文件
-                    CompareItemView compareItemView = new CompareItemView(oldItemView, newItemView);
-                    compareItemView.setSize(this.conflictPanel.getWidth() - 20, itemSize.height);
-                    this.conflictPanel.add(compareItemView);
+                    PhotoComparedItem photoComparedItem = new PhotoComparedItem(oldPhotoViewItem, newPhotoViewItem);
+                    photoComparedItem.setSize(this.conflictPanel.getWidth() - 20, itemSize.height);
+                    this.conflictPanel.add(photoComparedItem);
                 }
             }
         }

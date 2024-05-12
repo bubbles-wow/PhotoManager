@@ -76,6 +76,8 @@ public class IconButton extends JButton {
         addMouseListener(mouseAdapter);
         repaint();
     }
+
+    @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -93,10 +95,6 @@ public class IconButton extends JButton {
         Shape shape = new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), BUTTON_RADIUS, BUTTON_RADIUS);
         g2d.fill(shape);
         //super.paintComponent(g);
-    }
-
-    protected void paintBorder(Graphics g) {
-
     }
 
     public void todo() {

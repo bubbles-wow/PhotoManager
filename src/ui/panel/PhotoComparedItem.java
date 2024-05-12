@@ -7,12 +7,12 @@ import java.awt.*;
 
 import static util.core.GlobalResources.*;
 
-public class CompareItemView extends JPanel {
+public class PhotoComparedItem extends JPanel {
     private final Component oldItem;
 
     private final Component newItem;
 
-    public CompareItemView(Component oldItem, Component newItem) {
+    public PhotoComparedItem(Component oldItem, Component newItem) {
         this.oldItem = oldItem;
         this.newItem = newItem;
         this.add(oldItem);
