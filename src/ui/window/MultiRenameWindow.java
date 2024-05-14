@@ -59,9 +59,33 @@ public class MultiRenameWindow {
         this.initialInfo();
         this.initialize();
         this.initialTextField();
+        this.initialButton();
     }
 
-    public void initialize() {
+    private void initialButton() {
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setSize(this.window.getWidth() - 50, 30);
+        buttonPanel.setLayout(new MyLayoutManager() {
+            @Override
+            public void layoutContainer(Container target) {
+                int x = 0;
+                for (Component comp : target.getComponents()) {
+                    comp.setBounds(x, 0, comp.getWidth(), comp.getHeight());
+                    x += comp.getWidth() + 20;
+                }
+            }
+        });
+        JButton confirm = new JButton("确定");
+        confirm.setSize(80, 30);
+        confirm.addActionListener(e -> {
+            new FileOperationWindow(List.of(this.fileViewPanel.getComponents()), 4, ((PhotoViewItem) this.files.getFirst()).getFile().getParent());
+            window.dispose();
+        });
+        buttonPanel.add(confirm);
+        this.window.add(buttonPanel);
+    }
+
+    private void initialize() {
         fileViewPanel.setSize(this.window.getWidth() - 50, 240);
         fileViewPanel.setBackground(BACKGROUND);
         fileViewPanel.setLayout(new MyLayoutManager() {
@@ -96,7 +120,7 @@ public class MultiRenameWindow {
         window.add(scrollPane);
     }
 
-    public void initialInfo() {
+    private void initialInfo() {
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new MyLayoutManager() {
             @Override
@@ -139,7 +163,7 @@ public class MultiRenameWindow {
         window.add(infoPanel2);
     }
 
-    public void initialTextField() {
+    private void initialTextField() {
         name.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -201,7 +225,7 @@ public class MultiRenameWindow {
         });
     }
 
-    public void updateFileView() {
+    private void updateFileView() {
         String newName = name.getText();
         try {
             Integer.parseInt(start.getText());

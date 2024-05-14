@@ -3,7 +3,7 @@ package util.core;
 import java.io.File;
 
 public class FileRename {
-    private final File file;
+    private File file;
 
     private final String oldName;
 

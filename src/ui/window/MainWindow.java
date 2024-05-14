@@ -73,6 +73,7 @@ public class MainWindow {
         mainWindow.setSize(width, height);
         mainWindow.add(this.main);
         mainWindow.setBackground(Color.WHITE);
+        mainWindow.setLocationRelativeTo(null);
         mainWindow.setVisible(true);
         mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         SwingUtilities.updateComponentTreeUI(mainWindow);

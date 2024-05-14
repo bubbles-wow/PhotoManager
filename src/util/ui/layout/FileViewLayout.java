@@ -6,8 +6,8 @@ import java.awt.*;
 import static util.core.GlobalResources.itemSize;
 
 /**
-     * 图片预览布局管理
-     */
+ * 图片预览布局管理
+ */
 public class FileViewLayout extends MyLayoutManager {
     private int currentX = 4;
     private int currentY = 4;
@@ -39,10 +39,10 @@ public class FileViewLayout extends MyLayoutManager {
         Component parentComponent = parent.getParent();
         int scrollPaneWidth = parentComponent.getWidth();
         int scrollPaneHeight = parentComponent.getHeight();
-        if (lastWidth == scrollPaneWidth && lastHeight == scrollPaneHeight && lastComponentCount == parent.getComponents().length) {
+        if (lastWidth == scrollPaneWidth && lastHeight == scrollPaneHeight
+                && lastComponentCount == parent.getComponents().length) {
             return;
-        }
-        else {
+        } else {
             lastWidth = scrollPaneWidth;
             lastHeight = scrollPaneHeight;
             lastComponentCount = parent.getComponents().length;
@@ -95,4 +95,3 @@ public class FileViewLayout extends MyLayoutManager {
         this.lastComponentCount = 0;
     }
 }
-

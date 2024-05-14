@@ -2,6 +2,8 @@ package ui.panel;
 
 import ui.window.FileOperationWindow;
 import ui.window.MultiRenameWindow;
+import ui.window.PhotoViewWindow;
+import ui.window.PlayOptionWindow;
 import util.ui.component.IconButton;
 import util.ui.component.IconTextButton;
 import util.ui.component.ScrollPane;
@@ -159,6 +161,13 @@ public class FileView {
                                     }
                                 }
                             }
+                        }
+                        else if (e.getClickCount() == 2) {
+                            item.isSelected = true;
+                            item.setBackground(SELECT);
+                            lastSelected.clear();
+                            lastSelected.add(current);
+                            open();
                         }
                     }
                 }
@@ -338,7 +347,7 @@ public class FileView {
         IconTextButton open = new IconTextButton("\uee4a", "幻灯片放映", 96, 24) {
             @Override
             public void todo() {
-                open();
+                play();
             }
 
         };
@@ -478,6 +487,22 @@ public class FileView {
      * 文件打开
      */
     private void open() {
+        if (this.lastSelected.isEmpty()) {
+            return;
+        }
+        List<Component> files = List.of(this.fileView.getComponents());
+        int index = files.indexOf(this.lastSelected.getLast());
+        PhotoViewWindow photo = new PhotoViewWindow(files, index);
+        photo.show();
+    }
+
+    /**
+     * 文件打开
+     */
+    private void play() {
+        List<Component> files = List.of(this.fileView.getComponents());
+        int index = this.lastSelected.isEmpty() ? 0 : files.indexOf(this.lastSelected.getLast());
+        new PlayOptionWindow(new PhotoViewWindow(files, index));
     }
 
     /**
@@ -613,6 +638,7 @@ public class FileView {
             this.isLoading = true;
             this.currentFileCount = 0;
             this.currentFileSize = 0;
+            this.currentSelectedFileCount = 0;
             this.currentSelectedFileSize = 0;
             File[] folder = this.currentFile.listFiles();
             if (folder != null) {

@@ -50,4 +50,12 @@ public class RenameComparedItem extends JPanel {
         this.newLabel.setText(newName);
         this.newLabel.setToolTipText(newName);
     }
+
+    public String getNewName() {
+        return this.newLabel.getText();
+    }
+
+    public String getOldName() {
+        return this.oldLabel.getText();
+    }
 }

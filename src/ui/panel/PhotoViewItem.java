@@ -208,7 +208,6 @@ public class PhotoViewItem extends JPanel {
             iconHeight = (int) (height * 0.8 - 2);
         }
         return new Dimension(iconWidth, iconHeight);
-
     }
 
     /**
@@ -283,6 +282,9 @@ public class PhotoViewItem extends JPanel {
 
     public void cutTo(String path, boolean force) throws FileAlreadyExistsException {
         Path target = Paths.get(path, this.file.getName());
+        if (path.equals(this.file.getParent())) {
+            return;
+        }
         if (Files.exists(target) && !force) {
             throw new FileAlreadyExistsException(target.toString());
         }
