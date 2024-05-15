@@ -25,6 +25,8 @@ public class PhotoLabel extends JLabel {
 
     private int index;
 
+    private final double screenScale = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getDefaultTransform().getScaleX();
+
     private double scale = 1;
 
     public PhotoLabel(File file) {
@@ -55,7 +57,7 @@ public class PhotoLabel extends JLabel {
             this.timer.stop();
         }
 //        this.setIcon(null);
-        this.scale += scaleOffset;
+        this.scale += scaleOffset / this.screenScale;
         if (this.scale < 0.1) {
             this.scale = 0.1;
         }
@@ -76,6 +78,7 @@ public class PhotoLabel extends JLabel {
 
     public void load(int width, int height) {
         Dimension size = calculateSize(width, height);
+        this.scale = (double) size.width / this.originIcons[0].getIconWidth();
         resizeIcon(size.width, size.height);
     }
 
@@ -159,6 +162,16 @@ public class PhotoLabel extends JLabel {
             originHeight = height;
         }
         return new Dimension(originWidth, originHeight);
+    }
+
+    public Dimension getOriginImageSize() {
+//        ImageIcon image = this.resizeIcons[0] == null ? this.originIcons[0] : this.resizeIcons[0];
+        return new Dimension(this.originIcons[0].getIconWidth(), this.originIcons[0].getIconHeight());
+    }
+
+    public Dimension getCurrentImageSize() {
+        ImageIcon image = this.resizeIcons[0] == null ? this.originIcons[0] : this.resizeIcons[0];
+        return new Dimension(image.getIconWidth(), image.getIconHeight());
     }
 
     private ImageIcon getResizeIcon(Image image, int width, int height) {

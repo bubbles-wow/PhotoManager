@@ -7,10 +7,7 @@ import util.ui.component.ScrollPane;
 import util.ui.component.PhotoLabel;
 
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,9 +17,19 @@ public class PhotoViewWindow {
 
     private int point;
 
+    private Timer timer;
+
     private boolean isPlaying = false;
 
-    private Timer timer;
+    private boolean isFullScreen = false;
+
+    private boolean isFitMode = false;
+
+    private final JPanel mainPanel = new JPanel();
+
+    private PhotoLabel imageLabel;
+
+    private final JPanel buttonPanel = new JPanel();
     
     private final JFrame window = new JFrame("图片查看器") {
         @Override
@@ -34,12 +41,6 @@ public class PhotoViewWindow {
         }
     };
 
-    private final JPanel mainPanel = new JPanel();
-
-    private PhotoLabel imageLabel;
-
-    private final JPanel buttonPanel = new JPanel();
-
     public PhotoViewWindow(List<Component> fileList, int point) {
         this.files.addAll(fileList);
         this.point = point;
@@ -47,10 +48,9 @@ public class PhotoViewWindow {
     }
 
     public void show() {
-        this.window.setVisible(true);
         this.window.requestFocus();
         this.window.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        this.mainPanel.setSize(this.window.getSize());
+        this.window.setVisible(true);
     }
 
     private void initialWindow() {
@@ -67,18 +67,55 @@ public class PhotoViewWindow {
                 }
             }
         });
+        this.window.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent windowEvent) {
+                if (isPlaying) {
+                    timer.stop();
+                }
+            }
+        });
+        this.window.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                Dimension originImageSize = imageLabel.getOriginImageSize();
+                ScrollPane scrollPane = null;
+                for (Component comp : mainPanel.getComponents()) {
+                    if (comp instanceof ScrollPane) {
+                        scrollPane = (ScrollPane) comp;
+                        break;
+                    }
+                }
+                if (scrollPane != null) {
+                    scrollPane.getHorizontalScrollBar().setEnabled(false);
+                }
+                if (isPlaying && isFitMode) {
+                    if (isFullScreen) {
+                        imageLabel.load(window.getWidth(), window.getHeight());
+                    }
+                    else {
+                        imageLabel.load(window.getWidth() - 12, window.getHeight() - 36);
+                    }
+                }
+                else if (originImageSize.width > window.getWidth() || originImageSize.height > window.getHeight() - buttonPanel.getHeight() - 36) {
+                    imageLabel.load(window.getWidth() - 12, window.getHeight() - buttonPanel.getHeight() - 36);
+                }
+                else {
+                    imageLabel.load(originImageSize.width, originImageSize.height);
+                }
+                if (scrollPane != null) {
+                    scrollPane.getHorizontalScrollBar().setEnabled(true);
+                }
+            }
+        });
     }
 
     private void initialMainPanel() {
         if (this.files.get(this.point) instanceof PhotoViewItem item) {
             this.imageLabel = new PhotoLabel(item.getFile());
             this.imageLabel.load();
-            if (imageLabel.getWidth() > window.getWidth()|| imageLabel.getHeight() > window.getHeight() - buttonPanel.getHeight()) {
-                imageLabel.load(window.getWidth(), window.getHeight() - buttonPanel.getHeight() - 20);
-            }
         }
         ScrollPane scrollPane = new ScrollPane(this.imageLabel);
-        scrollPane.setSize(800, 600);
         scrollPane.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -89,7 +126,6 @@ public class PhotoViewWindow {
         });
         this.initialButtonPanel();
         this.mainPanel.setLayout(new BorderLayout());
-        this.mainPanel.setSize(800, 600);
         this.mainPanel.add(scrollPane, BorderLayout.CENTER);
         this.mainPanel.add(this.buttonPanel, BorderLayout.SOUTH);
     }
@@ -154,9 +190,15 @@ public class PhotoViewWindow {
     }
 
     private void reload(PhotoViewItem item) {
-        imageLabel.setFile(item.getFile());
-        if (imageLabel.getWidth() > window.getWidth() - 20 || imageLabel.getHeight() > window.getHeight() - buttonPanel.getHeight() - 20) {
-            imageLabel.load(window.getWidth() - 20, window.getHeight() - buttonPanel.getHeight() - 20);
+        this.imageLabel.setFile(item.getFile());
+        Dimension imageSize = this.imageLabel.getOriginImageSize();
+        if (imageSize.width > this.window.getWidth() || imageSize.height > this.window.getHeight() - this.buttonPanel.getHeight() - 36) {
+            if (!isFullScreen) {
+                this.imageLabel.load(this.window.getWidth() - 12, this.window.getHeight() - this.buttonPanel.getHeight() - 36);
+            }
+            else {
+                this.imageLabel.load(this.window.getWidth(), this.window.getHeight() - this.buttonPanel.getHeight() - 36);
+            }
         }
     }
 
@@ -166,6 +208,7 @@ public class PhotoViewWindow {
             this.isPlaying = false;
             GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
             if (device.isFullScreenSupported()) {
+                this.isFullScreen = false;
                 device.setFullScreenWindow(null);
             }
             this.window.setTitle("图片查看器");
@@ -188,10 +231,12 @@ public class PhotoViewWindow {
             this.timer.stop();
         }
         this.isPlaying = true;
+        this.isFitMode = fit;
         this.window.setTitle("幻灯片放映 - 图片查看器");
         GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         if (device.isFullScreenSupported() && fullScreen) {
             device.setFullScreenWindow(this.window);
+            this.isFullScreen = true;
         }
         if (fit) {
             this.imageLabel.load(this.window.getWidth(), this.window.getHeight());
@@ -206,9 +251,11 @@ public class PhotoViewWindow {
                         this.point = 0;
                     }
                     else {
+                        if (device.isFullScreenSupported()) {
+                            device.setFullScreenWindow(null);
+                        }
                         JOptionPane.showMessageDialog(null, "已经是最后一张图片了", "提示", JOptionPane.INFORMATION_MESSAGE);
-                        this.timer.stop();
-                        this.isPlaying = false;
+                        this.quitPlay();
                     }
                 }
             }
@@ -221,9 +268,11 @@ public class PhotoViewWindow {
                         this.point = this.files.size() - 1;
                     }
                     else {
+                        if (device.isFullScreenSupported()) {
+                            device.setFullScreenWindow(null);
+                        }
                         JOptionPane.showMessageDialog(null, "已经是第一张图片了", "提示", JOptionPane.INFORMATION_MESSAGE);
-                        this.timer.stop();
-                        this.isPlaying = false;
+                        this.quitPlay();
                     }
                 }
             }
@@ -232,8 +281,14 @@ public class PhotoViewWindow {
             }
             if (this.files.get(this.point) instanceof PhotoViewItem item) {
                 this.imageLabel.setFile(item.getFile());
-                if (fit) {
-                    this.imageLabel.load(this.window.getWidth(), this.window.getHeight());
+                Dimension imageSize = this.imageLabel.getOriginImageSize();
+                if (fit || imageSize.width > this.window.getWidth() || imageSize.height > this.window.getHeight() - 36) {
+                    if (isFullScreen) {
+                        this.imageLabel.load(this.window.getWidth(), this.window.getHeight());
+                    }
+                    else {
+                        this.imageLabel.load(this.window.getWidth() - 12, this.window.getHeight() - 36);
+                    }
                 }
             }
             System.out.println("play picture: " + this.point);
