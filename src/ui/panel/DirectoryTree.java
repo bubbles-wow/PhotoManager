@@ -9,6 +9,7 @@ import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.util.Objects;
 
 import static util.core.GlobalResources.*;
 
@@ -64,7 +65,7 @@ public class DirectoryTree extends JTree {
                 FileNode fileNode = (FileNode) node.getUserObject();
                 File file = fileNode.getFile();
                 File newFile = new File(file.getAbsolutePath());
-                if (fileNode.getLastModifiedTime() != newFile.lastModified() || !fileNode.isLoaded) {
+                if (fileNode.getLastModifiedTime() != newFile.lastModified() || Objects.requireNonNull(file.listFiles()).length != Objects.requireNonNull(newFile.listFiles()).length || !fileNode.isLoaded) {
                     fileNode.reload();
                     node.removeAllChildren();
                     EXECUTOR.submit(() -> FILE_TREE.addNodes(node, 1));
@@ -80,12 +81,13 @@ public class DirectoryTree extends JTree {
                             i--;
                             continue;
                         }
-                        if (childNode.getLastModifiedTime() != newChildFile.lastModified() || !childNode.isLoaded) {
+                        if (childNode.getLastModifiedTime() != newChildFile.lastModified() || Objects.requireNonNull(file.listFiles()).length != Objects.requireNonNull(newFile.listFiles()).length || !childNode.isLoaded) {
                             childNode.reload();
                             child.removeAllChildren();
                             EXECUTOR.submit(() -> FILE_TREE.addNodes(child, 0));
                         }
                     }
+                    EXECUTOR.submit(() -> updateUI());
                 }
                 try {
                     int sleepTime = fileNode.getFolderCount() * 20;

@@ -48,9 +48,7 @@ public class FileNode {
     public void reload() {
         String path = this.file.getAbsolutePath();
         File newFile = new File(path);
-        if (newFile.lastModified() != this.lastModifiedTime) {
-            load(newFile, FileSystemView.getFileSystemView().getSystemDisplayName(newFile));
-        }
+        load(newFile, FileSystemView.getFileSystemView().getSystemDisplayName(newFile));
     }
 
     public File getFile() {

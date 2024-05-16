@@ -9,7 +9,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import static util.core.GlobalResources.ICON_FONT;
 import static util.core.GlobalResources.errorDialog;
 
 public class PhotoLabel extends JLabel {
@@ -31,7 +30,6 @@ public class PhotoLabel extends JLabel {
 
     public PhotoLabel(File file) {
         this.file = file;
-        this.setFont(ICON_FONT.deriveFont(Font.PLAIN, 64));
         this.setHorizontalAlignment(SwingConstants.CENTER);
     }
 
@@ -57,12 +55,16 @@ public class PhotoLabel extends JLabel {
             this.timer.stop();
         }
 //        this.setIcon(null);
-        this.scale += scaleOffset / this.screenScale;
-        if (this.scale < 0.1) {
-            this.scale = 0.1;
+        while (Math.abs(scaleOffset / this.screenScale) * this.originIcons[0].getIconWidth() > 50 || Math.abs(scaleOffset / this.screenScale) * this.originIcons[0].getIconHeight() > 50) {
+            scaleOffset /= 2;
         }
+        this.scale += scaleOffset / this.screenScale;
         int newWidth = (int) (this.originIcons[0].getIconWidth() * this.scale);
         int newHeight = (int) (this.originIcons[0].getIconHeight() * this.scale);
+        if (newWidth < 10 || newHeight < 10) {
+            this.scale -= scaleOffset / this.screenScale;
+            return;
+        }
         this.resizeIcon(newWidth, newHeight);
     }
 
@@ -167,11 +169,6 @@ public class PhotoLabel extends JLabel {
     public Dimension getOriginImageSize() {
 //        ImageIcon image = this.resizeIcons[0] == null ? this.originIcons[0] : this.resizeIcons[0];
         return new Dimension(this.originIcons[0].getIconWidth(), this.originIcons[0].getIconHeight());
-    }
-
-    public Dimension getCurrentImageSize() {
-        ImageIcon image = this.resizeIcons[0] == null ? this.originIcons[0] : this.resizeIcons[0];
-        return new Dimension(image.getIconWidth(), image.getIconHeight());
     }
 
     private ImageIcon getResizeIcon(Image image, int width, int height) {

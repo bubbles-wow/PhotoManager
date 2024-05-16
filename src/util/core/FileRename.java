@@ -3,16 +3,11 @@ package util.core;
 import java.io.File;
 
 public class FileRename {
-    private File file;
+    private final File file;
 
     private final String oldName;
 
     private String newName;
-
-    public FileRename(File file, String newName) {
-        this(file);
-        this.newName = newName;
-    }
 
     public FileRename(File file) {
         this.file = file;

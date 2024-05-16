@@ -84,7 +84,9 @@ public class FileOperationWindow {
                     File oldFile = new File(Paths.get(this.newPath, item.getOldName()).toString());
                     File newFile = new File(Paths.get(this.newPath, item.getNewName()).toString());
                     if (oldFile.exists()) {
-                        oldFile.renameTo(newFile);
+                        if (!oldFile.renameTo(newFile)) {
+                            errorDialog("重命名文件时出现错误：" + oldFile, new Exception("重命名文件失败"));
+                        }
                     }
                 }
             }
