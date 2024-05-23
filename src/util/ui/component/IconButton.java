@@ -98,6 +98,6 @@ public class IconButton extends JButton {
     }
 
     public void todo() {
-        System.out.println(getText());
+//        System.out.println(getText());
     }
 }

@@ -87,7 +87,8 @@ public class DirectoryTree extends JTree {
                             EXECUTOR.submit(() -> FILE_TREE.addNodes(child, 0));
                         }
                     }
-                    EXECUTOR.submit(() -> updateUI());
+                    SwingUtilities.invokeLater(() -> updateUI());
+//                    EXECUTOR.submit(() -> updateUI());
                 }
                 try {
                     int sleepTime = fileNode.getFolderCount() * 20;

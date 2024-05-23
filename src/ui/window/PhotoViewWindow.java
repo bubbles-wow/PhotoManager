@@ -291,7 +291,7 @@ public class PhotoViewWindow {
                     }
                 }
             }
-            System.out.println("play picture: " + this.point);
+//            System.out.println("play picture: " + this.point);
         });
         if (!this.window.isVisible()) {
             this.show();

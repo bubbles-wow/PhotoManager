@@ -1,10 +1,10 @@
 package util.core;
 
 import java.awt.*;
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.swing.*;
@@ -30,20 +30,28 @@ public class GlobalResources {
 
     static {
         try {
-            ICON_FONT = Font.createFont(Font.TRUETYPE_FONT, new File("src/res/Segoe Fluent Icons.ttf"))
-                    .deriveFont(Font.PLAIN, 16);
+            ICON_FONT = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(GlobalResources.class.getResource("/res/Segoe Fluent Icons.ttf")).openStream()).deriveFont(Font.PLAIN, 16);
             GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(ICON_FONT);
         } catch (FontFormatException | IOException e) {
-            errorDialog("无法加载字体文件：src/res/Segoe Fluent Icons.ttf，部分图标无法显示。", e);
-            ICON_FONT = new Font("微软雅黑", Font.PLAIN, 16);
+            errorDialog("无法加载图标字体，部分图标无法显示。", e);
         }
         String lookAndFeel = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
         try {
             UIManager.setLookAndFeel(lookAndFeel);
-        } catch (Exception e) {
-            errorDialog("无法设置" + lookAndFeel + "外观", e);
+        } catch (Exception ignored) {
         }
-        setUIFont(new FontUIResource(new Font("微软雅黑", Font.PLAIN, 12)));
+        try {
+            Font textFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(GlobalResources.class.getResource("/res/MiSans-Medium.ttf")).openStream()).deriveFont(Font.PLAIN, 12);
+            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(textFont);
+            setUIFont(new FontUIResource(textFont));
+            if (ICON_FONT == null) {
+                ICON_FONT = textFont.deriveFont(Font.PLAIN, 16);
+            }
+        }
+        catch (Exception e) {
+            errorDialog("无法加载字体，部分文字可能无法显示。", e);
+            ICON_FONT = Font.getFont("Dialog");
+        }
         FILE_TREE = new FileTree();
     }
 

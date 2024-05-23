@@ -84,7 +84,7 @@ public class FileView {
         this.fileView.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                System.out.println(e.getPoint());
+//                System.out.println(e.getPoint());
                 fileView.requestFocus();
                 // 鼠标左键点击触发选中功能
                 if (e.getButton() == MouseEvent.BUTTON1) {
@@ -440,7 +440,6 @@ public class FileView {
      */
     private void initialInfoBar() {
         this.infoBar.setBackground(BACKGROUND);
-        this.infoBar.setFont(new Font("微软雅黑", Font.PLAIN, 12));
         this.infoBar.setBorder(BorderFactory.createMatteBorder(0, 1, 1, 1, Color.GRAY));
         this.updateInfo(0, 0);
     }
@@ -658,7 +657,6 @@ public class FileView {
             if (this.currentFileCount == 0) {
                 JLabel label = new JLabel("没有图片");
                 label.setSize(100, 20);
-                label.setFont(new Font("微软雅黑", Font.PLAIN, 12));
                 label.setHorizontalAlignment(SwingConstants.CENTER);
                 this.fileView.add(label);
                 this.isLoading = false;

@@ -18,8 +18,8 @@ public class PlayOptionWindow {
     }
 
     public void initialWindow() {
+        this.window.setSize(280, 250);
         initialMainPanel();
-        this.window.setSize(320, 240);
         this.window.setLocationRelativeTo(null);
         this.window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.window.setResizable(false);
@@ -38,6 +38,7 @@ public class PlayOptionWindow {
                     comp.setBounds(x, y, width, 30);
                     y += 40;
                 }
+                parent.setSize(parent.getWidth(), y + 10);
             }
         });
         JPanel panel1 = new JPanel();

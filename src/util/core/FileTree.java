@@ -52,7 +52,7 @@ public class FileTree {
      * @param deep   加载目录树的深度
      */
     public void addNodes(DefaultMutableTreeNode root, int deep) {
-        System.out.println("addNodes: " + root.toString());
+//        System.out.println("addNodes: " + root.toString());
         FileNode currentFolder = (FileNode) root.getUserObject();
         currentFolder.isLoaded = true;
         File[] subFiles = currentFolder.getFile().listFiles();

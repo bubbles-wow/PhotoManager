@@ -261,7 +261,7 @@ public class PhotoViewItem extends JPanel {
         else {
             loadIcon(new ImageIcon(this.file.getAbsolutePath()));
         }
-        System.out.println("load picture: " + this.file.toString());
+//        System.out.println("load picture: " + this.file.toString());
     }
 
     public File getFile() {

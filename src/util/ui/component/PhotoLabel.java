@@ -75,7 +75,7 @@ public class PhotoLabel extends JLabel {
         else {
             loadPicture();
         }
-        System.out.println("load picture: " + this.file.toString());
+//        System.out.println("load picture: " + this.file.toString());
     }
 
     public void load(int width, int height) {
