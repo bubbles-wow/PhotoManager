@@ -41,7 +41,7 @@ public class GlobalResources {
         } catch (Exception ignored) {
         }
         try {
-            Font textFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(GlobalResources.class.getResource("/res/MiSans-Medium.ttf")).openStream()).deriveFont(Font.PLAIN, 12);
+            Font textFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(GlobalResources.class.getResource("/res/MiSans-Regular.ttf")).openStream()).deriveFont(Font.PLAIN, 12);
             GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(textFont);
             setUIFont(new FontUIResource(textFont));
             if (ICON_FONT == null) {
