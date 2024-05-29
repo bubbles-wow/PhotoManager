@@ -4,7 +4,7 @@ set CLASSPATH=lib\hutool-all-5.8.27.jar
 set SOURCE_DIR=src
 set TARGET_DIR=bin
 
-echo 正在构建项目...
+echo 正在构建PhotoManager...
 rmdir /s /q bin
 mkdir bin\
 cd bin
@@ -28,6 +28,5 @@ if %choice%==y goto run
 if %choice%==Y goto run
 goto end
 :run
-java -jar PhotoManager.jar
+start /min java -jar PhotoManager.jar
 :end
-pause

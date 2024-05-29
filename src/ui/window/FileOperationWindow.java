@@ -415,13 +415,11 @@ public class FileOperationWindow {
      * @throws IOException 文件操作异常
      */
     private void copy(String oldPath, String newPath) throws IOException {
-        executorService.submit(() -> {
-            try {
-                Files.copy(Paths.get(oldPath), Paths.get(newPath));
-            } catch (IOException e) {
-                errorDialog("复制文件时出现错误：" + oldPath, e);
-            }
-        });
+        try {
+            Files.copy(Paths.get(oldPath), Paths.get(newPath));
+        } catch (IOException e) {
+            errorDialog("复制文件时出现错误：" + oldPath, e);
+        }
     }
 
     /**
@@ -431,13 +429,11 @@ public class FileOperationWindow {
      * @throws IOException 文件操作异常
      */
     private void cut(String oldPath, String newPath) throws IOException {
-        executorService.submit(() -> {
-            try {
-                Files.move(Paths.get(oldPath), Paths.get(newPath));
-            } catch (IOException e) {
-                errorDialog("移动文件时出现错误：" + oldPath, e);
-            }
-        });
+        try {
+            Files.move(Paths.get(oldPath), Paths.get(newPath));
+        } catch (IOException e) {
+            errorDialog("移动文件时出现错误：" + oldPath, e);
+        }
     }
 
     /**

@@ -1,5 +1,5 @@
 # PhotoManager  
-一个图片管理程序，使用 Java Swing 实现，支持 Windows 和 Linux (支持GUI的Linux发行版)
+一个图片管理程序，使用 Java Swing 实现，支持 Windows 和 Linux (带GUI的Linux发行版)
 
 ## 使用方式
 1. 确保系统已经安装了JDK，并将相关路径添加到系统环境变量中  
@@ -43,8 +43,9 @@
 4. 优化部分窗口的展开位置
 5. 优化图片查看器的自适应效果，现在会根据图片大小和窗口大小来判断调整
 6. 修改了全局字体
+7. 修复粘贴文件结束后，当前文件夹图片预览不显示新图片的问题
 
-## 使用的资源
+## 使用的第三方资源
 - [hutool](https://gitee.com/dromara/hutool): 🍬小而全的Java工具类库，使Java拥有函数式语言般的优雅，让Java语言也可以“甜甜的”。
 - [Segoe Fluent 图标字体](https://learn.microsoft.com/zh-cn/windows/apps/design/style/segoe-fluent-icons-font): 微软开发的一种用于 Windows 和其他微软产品的图标字体，提供了一组现代、流畅、简洁的图标。([EULA](src/res/EULA.txt))
 - [MiSans](https://hyperos.mi.com/font/details/sc): 一个支持 600 多种语言，字符数量超过 10 万个的字体家族.
